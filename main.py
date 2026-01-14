@@ -157,14 +157,42 @@ def main(config):
 
         train_one_epoch(config, model, criterion, data_loader_train, optimizer, epoch, mixup_fn, lr_scheduler,
                         loss_scaler)
-        if dist.get_rank() == 0 and (epoch % config.SAVE_FREQ == 0 or epoch == (config.TRAIN.EPOCHS - 1)):
-            save_checkpoint(config, epoch, model_without_ddp, max_accuracy, optimizer, lr_scheduler, loss_scaler,
-                            logger)
+        # if dist.get_rank() == 0 and (epoch % config.SAVE_FREQ == 0 or epoch == (config.TRAIN.EPOCHS - 1)):
+        #     save_checkpoint(config, epoch, model_without_ddp, max_accuracy, optimizer, lr_scheduler, loss_scaler,
+        #                     logger)
 
-        acc1, acc5, loss = validate(config, data_loader_val, model)
-        logger.info(f"Accuracy of the network on the {len(dataset_val)} test images: {acc1:.1f}%")
-        max_accuracy = max(max_accuracy, acc1)
-        logger.info(f'Max accuracy: {max_accuracy:.2f}%')
+        # acc1, acc5, loss = validate(config, data_loader_val, model)
+        # logger.info(f"Accuracy of the network on the {len(dataset_val)} test images: {acc1:.1f}%")
+        # max_accuracy = max(max_accuracy, acc1)
+        # logger.info(f'Max accuracy: {max_accuracy:.2f}%')
+
+
+        # acc1, acc5, loss = validate(config, data_loader_val, model)
+        # logger.info(f"Accuracy of the network on the {len(dataset_val)} test images: {acc1:.1f}%")
+
+        if acc1 > max_accuracy:
+            max_accuracy = acc1
+            is_best = True
+            logger.info(f'New max accuracy: {max_accuracy:.2f}%')
+        else:
+            is_best = False
+            logger.info(f'Max accuracy: {max_accuracy:.2f}%')
+
+        if dist.get_rank() == 0 and is_best:
+            save_path = os.path.join(config.OUTPUT, 'ckpt_best.pth')
+            logger.info(f"{save_path} saving (best model)...")
+            checkpoint = {
+                'model': model_without_ddp.state_dict(),
+                'optimizer': optimizer.state_dict(),
+                'lr_scheduler': lr_scheduler.state_dict(),
+                'max_accuracy': max_accuracy,
+                'scaler': loss_scaler.state_dict(),
+                'epoch': epoch,
+                'config': config
+            }
+            torch.save(checkpoint, save_path)
+            logger.info(f"{save_path} saved !!!")
+
 
     total_time = time.time() - start_time
     total_time_str = str(datetime.timedelta(seconds=int(total_time)))
@@ -252,7 +280,12 @@ def validate(config, data_loader, model):
 
         # measure accuracy and record loss
         loss = criterion(output, target)
-        acc1, acc5 = accuracy(output, target, topk=(1, 5))
+        #acc1, acc5 = accuracy(output, target, topk=(1, 5))
+        if config.MODEL.NUM_CLASSES >= 5:
+            acc1, acc5 = accuracy(output, target, topk=(1, 5))
+        else:
+            acc1 = accuracy(output, target, topk=(1,))[0]
+            acc5 = torch.tensor(0., device=acc1.device)
 
         acc1 = reduce_tensor(acc1)
         acc5 = reduce_tensor(acc5)

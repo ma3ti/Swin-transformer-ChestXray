@@ -1,0 +1,21 @@
+MODEL:
+  TYPE: swin
+  NAME: swin_tiny_patch4_window7_224
+  DROP_PATH_RATE: 0.2
+  SWIN:
+    EMBED_DIM: 96
+    DEPTHS: [ 2, 2, 6, 2 ]
+    NUM_HEADS: [ 3, 6, 12, 24 ]
+    WINDOW_SIZE: 7
+DATA:
+  DATASET: custom               # Corrisponde alla modifica fatta sopra
+  IMG_SIZE: 224
+  # Disabilita Mixup/Cutmix per dataset medici piccoli/binari se i risultati sono strani, 
+  # ma Swin di solito ne beneficia. Se l'accuracy non sale, prova a mettere questi a 0.
+  BATCH_SIZE: 32                # Adatta in base alla tua GPU
+TRAIN:
+  EPOCHS: 30                    # 30-50 epoche sono sufficienti per fine-tuning
+  WARMUP_EPOCHS: 5
+  BASE_LR: 5e-5                 # LR più basso per fine-tuning (default è 5e-4)
+  WEIGHT_DECAY: 1e-8            # Decay basso
+  MIN_LR: 1e-7

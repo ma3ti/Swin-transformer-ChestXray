@@ -116,6 +116,12 @@ def build_dataset(is_train, config):
             ann_file = prefix + "_map_val.txt"
         dataset = IN22KDATASET(config.DATA.DATA_PATH, ann_file, transform)
         nb_classes = 21841
+    elif config.DATA.DATASET == 'custom':
+        prefix = 'train' if is_train else 'val'
+        root = os.path.join(config.DATA.DATA_PATH, prefix)
+        dataset = datasets.ImageFolder(root, transform=transform)
+        nb_classes = len(dataset.classes) # Rileva automaticamente 2 classi
+        print(f"Loaded custom dataset from {root}. Found {nb_classes} classes: {dataset.classes}")
     else:
         raise NotImplementedError("We only support ImageNet Now.")
 
