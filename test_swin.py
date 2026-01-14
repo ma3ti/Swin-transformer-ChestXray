@@ -49,5 +49,6 @@ try:
         output = model(dummy_input)
     print(f"Output shape: {output.shape}")
     print("Success! The Swin Transformer is running on your Mac.")
+    print(output)
 except Exception as e:
     print(f"An error occurred during inference: {e}")
