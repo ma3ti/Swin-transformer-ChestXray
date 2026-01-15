@@ -141,4 +141,3 @@ dmypy.json
 /finetune/results_preds.npy
 /finetune/results_labels.npy
 /finetune/TRAINING.md
-/finetune/pre-trained
