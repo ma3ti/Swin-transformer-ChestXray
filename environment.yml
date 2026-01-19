@@ -1,0 +1,17 @@
+name: swin
+channels:
+  - defaults
+dependencies:
+  - python=3.10
+  - timm
+  - pytorch
+  - ipykernel
+  - opencv
+  - termcolor
+  - yacs
+  - scipy
+  - kagglehub
+  - scikit-learn
+  - matplotlib
+  - seaborn
+prefix: /Users/ma3ti/miniconda3/envs/swin
