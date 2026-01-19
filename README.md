@@ -31,11 +31,14 @@ pip install -r requirements.txt
 
 ### Training (Fine_tuning)
 ```bash
-python -m torch.distributed.launch --nproc_per_node 1 main.py \
+!python -m torch.distributed.launch --nproc_per_node 1 --master_port 12345 main.py \
 --cfg configs/swin/chest_xray_finetune.yaml \
---data-path /path/to/dataset \
+--pretrained /content/swin_tiny_patch4_window7_224.pth \
+--data-path /content/dataset/chest_xray_new \
 --batch-size 32 \
---tag split_80_10_10
+--accumulation-steps 1 \
+--opts MODEL.NUM_CLASSES 2
+
 ```
 
 ### Inference and Evaluation
