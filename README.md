@@ -24,7 +24,7 @@ The model is trained on the **Chest X-Ray Images (Pneumonia)** dataset.
 
 ### 1. Installation
 ```bash
-git clone [https://github.com/TuoNomeUtente/Swin-Transformer-ChestXray.git](https://github.com/TuoNomeUtente/Swin-Transformer-ChestXray.git)
+git clone [https://github.com/ma3ti/Swin-transformer-ChestXray](https://github.com/ma3ti/Swin-transformer-ChestXray)
 cd Swin-Transformer-ChestXray
 pip install -r requirements.txt
 ```

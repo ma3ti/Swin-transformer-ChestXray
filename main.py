@@ -113,13 +113,17 @@ def main(config):
     else:
         lr_scheduler = build_scheduler(config, optimizer, len(data_loader_train))
 
-    if config.AUG.MIXUP > 0.:
+#    if config.AUG.MIXUP > 0.:
         # smoothing is handled with mixup label transform
-        criterion = SoftTargetCrossEntropy()
-    elif config.MODEL.LABEL_SMOOTHING > 0.:
-        criterion = LabelSmoothingCrossEntropy(smoothing=config.MODEL.LABEL_SMOOTHING)
-    else:
-        criterion = torch.nn.CrossEntropyLoss()
+#        criterion = SoftTargetCrossEntropy()
+#    elif config.MODEL.LABEL_SMOOTHING > 0.:
+#        criterion = LabelSmoothingCrossEntropy(smoothing=config.MODEL.LABEL_SMOOTHING)
+#    else:
+#        criterion = torch.nn.CrossEntropyLoss()
+
+    class_weights = torch.tensor([3.0, 1.0]).cuda()
+    criterion = torch.nn.CrossEntropyLoss(weight=class_weights)
+    logger.info("USING WEIGHTED LOSS: [Normal: 3.0, Pneumonia: 1.0]")
 
     max_accuracy = 0.0
 
@@ -169,7 +173,7 @@ def main(config):
                 dst_path = os.path.join(config.OUTPUT, 'ckpt_best.pth')
                 
                 if os.path.exists(src_path):
-                    shutil.copy(src_path, dst_path)
+                    shutil.move(src_path, dst_path)
                     logger.info(f"*** New Best Model Saved (Epoch {epoch}): {max_accuracy:.2f}% ***")
 
         logger.info(f'Max accuracy: {max_accuracy:.2f}%')
@@ -262,7 +266,7 @@ def validate(config, data_loader, model):
         loss = criterion(output, target)
         if config.MODEL.NUM_CLASSES < 5:
             acc1 = accuracy(output, target, topk=(1,))[0]
-            acc5 = 0.0
+            acc5 = torch.tensor(0.0, device=target.device)
         else:
             acc1, acc5 = accuracy(output, target, topk=(1, 5))
 
