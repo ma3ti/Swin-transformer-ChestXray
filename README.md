@@ -1,24 +1,29 @@
-# Pneumonia Detection using Swin Transformer
+# Pneumonia Detection using Swin Transformer & ViT Complexity Analysis
+
+![PyTorch](https://img.shields.io/badge/PyTorch-%23EE4C2C.svg?style=for-the-badge&logo=PyTorch&logoColor=white) ![Swin Transformer](https://img.shields.io/badge/Swin-Transformer-blue?style=for-the-badge) ![Medical Imaging](https://img.shields.io/badge/Medical-Imaging-green?style=for-the-badge)
 
 This repository contains a fine-tuned implementation of **Swin Transformer (Tiny)** for classifying Chest X-Ray images (Normal vs. Pneumonia).
 
-This project was developed for the **Computer Vision** course to demonstrate the effectiveness of Hierarchical Vision Transformers in medical imaging tasks, comparing their complexity and accuracy against traditional methods.
+Developed for a **Computer Vision** course, this project goes beyond simple classification. It performs a comparative study between **Hierarchical Vision Transformers (Swin)** and **Global Vision Transformers (ViT)**, analyzing the trade-offs between **accuracy**, **inference speed**, and **memory complexity ($O(N)$ vs $O(N^2)$)**.
 
 ## Key Features & Modifications
 
-Unlike the original Microsoft repository, this version includes:
-* **Custom Data Splitter**: A script to re-balance the dataset into 80% Train, 10% Val, 10% Test (`dataset_splitter.py`).
-* **Modern PyTorch Support**: Patched `utils.py` to fix compatibility issues with PyTorch 2.6+ (`weights_only=False` fix).
-* **Local Inference Script**: Optimized `test_swin.py` for running inference on local machines, with support for **Apple Metal (MPS)** acceleration on Mac.
-* **Visualization Tools**: Notebooks to generate Confusion Matrices and Error Analysis plots.
+Unlike standard implementations, this project includes custom tools for deep analysis:
+
+* **Swin vs. ViT Simulation**: A unique experimental setup comparing standard Swin (Window 7), Hybrid Swin (Window 14), and a Simulated ViT (Window 56 / Global Attention) using the same backbone.
+* **Complexity Benchmarks**: Custom scripts to measure **VRAM usage** and **Inference Latency** across different resolutions, demonstrating the quadratic cost of Global Attention.
+* **Apple Silicon Optimization**: Code optimized for local inference on **Mac (M1/M2/M3)** using Metal Performance Shaders (MPS).
+* **Modern PyTorch Support**: Patched compatibility for PyTorch 2.x (`weights_only=False` fixes).
+* **Advanced Visualization**: Notebooks for Confusion Matrices, Error Analysis, and Grad-CAM (Explainability).
 
 ## Dataset
 
 The model is trained on the **Chest X-Ray Images (Pneumonia)** dataset.
 * **Classes**: NORMAL, PNEUMONIA
+* **Pre-processing**: Images resized to 224x224 (or 384x384 for high-res experiments).
 * **Structure**: The code expects the dataset to be organized in `dataset/chest_xray_new/` with `train`, `val`, and `test` subfolders.
 
-*(Note: The dataset is not included in this repo due to size limits. You can download it from Kaggle at https://www.kaggle.com/datasets/paultimothymooney/chest-xray-pneumonia).*
+*(Note: The dataset is not included in this repo due to size limits. You can download it from Kaggle at https://www.kaggle.com/datasets/paultimothymooney/chest-xray-pneumonia). and place it in `dataset/chest_xray_new/`*
 
 ## Usage
 
@@ -26,28 +31,19 @@ The model is trained on the **Chest X-Ray Images (Pneumonia)** dataset.
 ```bash
 git clone [https://github.com/ma3ti/Swin-transformer-ChestXray](https://github.com/ma3ti/Swin-transformer-ChestXray)
 cd Swin-Transformer-ChestXray
-pip install -r requirements.txt
+conda env create -f environment.yaml
+conda activate swin
 ```
 
 ### Training (Fine_tuning)
-```bash
-!python -m torch.distributed.launch --nproc_per_node 1 --master_port 12345 main.py \
---cfg configs/swin/chest_xray_finetune.yaml \
---pretrained /content/swin_tiny_patch4_window7_224.pth \
---data-path /content/dataset/chest_xray_new \
---batch-size 32 \
---accumulation-steps 1 \
---opts MODEL.NUM_CLASSES 2
+You can run the fine-tuning directly via the provided Jupyter Notebook at `./finetune/Swin__finetuning.ipynb`
 
-```
+![Training results](./finetune/swin_vs_vit_training_history.png)
 
 ### Inference and Evaluation
-```bash
-python test_swin.py
-```
+Run the evaluation script to generate classification reports, confusion matrices and other metrics: `./finetune/test.ipynb`
+
 
 ### Results
+![Metrics](./finetune/metrics.png)
 
-    Best Accuracy: ~91.5% (on Test set)
-
-    Sensitivity (Recall on Pneumonia): High sensitivity achieved to minimize False Negatives in a medical context.
