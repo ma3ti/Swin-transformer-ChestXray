@@ -35,7 +35,7 @@ conda env create -f environment.yaml
 conda activate swin
 ```
 
-### Training (Fine_tuning)
+### Training (Finetuning)
 You can run the fine-tuning directly via the provided Jupyter Notebook at `./finetune/Swin__finetuning.ipynb`
 
 ![Training results](./finetune/swin_vs_vit_training_history.png)
