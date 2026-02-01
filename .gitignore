@@ -142,3 +142,4 @@ dmypy.json
 /finetune/results_labels.npy
 /finetune/TRAINING.md
 *.pth
+/finetune/test.ipynb

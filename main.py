@@ -126,6 +126,7 @@ def main(config):
     logger.info("USING WEIGHTED LOSS: [Normal: 3.0, Pneumonia: 1.0]")
 
     max_accuracy = 0.0
+    min_loss = float('inf')
 
     if config.TRAIN.AUTO_RESUME:
         resume_file = auto_resume_helper(config.OUTPUT)
@@ -161,22 +162,24 @@ def main(config):
     for epoch in range(config.TRAIN.START_EPOCH, config.TRAIN.EPOCHS):
         data_loader_train.sampler.set_epoch(epoch)
         train_one_epoch(config, model, criterion, data_loader_train, optimizer, epoch, mixup_fn, lr_scheduler, loss_scaler)
-        acc1, acc5, loss = validate(config, data_loader_val, model)
+        acc1, acc5, val_loss = validate(config, data_loader_val, model)
         logger.info(f"Accuracy of the network on the {len(dataset_val)} test images: {acc1:.1f}%")
 
-        if acc1 > max_accuracy:
-            max_accuracy = acc1
+        if val_loss < min_loss:
+            min_loss = val_loss
             
             if dist.get_rank() == 0:
-                save_checkpoint(config, epoch, model_without_ddp, max_accuracy, optimizer, lr_scheduler, loss_scaler, logger)
+                # We still pass acc1 for logging purposes in the checkpoint
+                save_checkpoint(config, epoch, model_without_ddp, acc1, optimizer, lr_scheduler, loss_scaler, logger)
+                
                 src_path = os.path.join(config.OUTPUT, f'ckpt_epoch_{epoch}.pth')
                 dst_path = os.path.join(config.OUTPUT, 'ckpt_best.pth')
                 
                 if os.path.exists(src_path):
                     shutil.move(src_path, dst_path)
-                    logger.info(f"*** New Best Model Saved (Epoch {epoch}): {max_accuracy:.2f}% ***")
+                    logger.info(f"*** New Best Model Saved (Epoch {epoch}) with Loss: {min_loss:.4f} ***")
 
-        logger.info(f'Max accuracy: {max_accuracy:.2f}%')
+        logger.info(f'Min Loss: {min_loss:.4f}')
 
     total_time = time.time() - start_time
     total_time_str = str(datetime.timedelta(seconds=int(total_time)))
