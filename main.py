@@ -121,9 +121,13 @@ def main(config):
 #    else:
 #        criterion = torch.nn.CrossEntropyLoss()
 
-    class_weights = torch.tensor([3.0, 1.0]).cuda()
-    criterion = torch.nn.CrossEntropyLoss(weight=class_weights)
-    logger.info("USING WEIGHTED LOSS: [Normal: 3.0, Pneumonia: 1.0]")
+    #class_weights = torch.tensor([3.0, 1.0]).cuda()
+    #criterion = torch.nn.CrossEntropyLoss(weight=class_weights)
+    #logger.info("USING WEIGHTED LOSS: [Normal: 3.0, Pneumonia: 1.0]")
+
+    criterion = torch.nn.CrossEntropyLoss()
+    logger.info("USING Standard Cross Entropy Loss")
+
 
     max_accuracy = 0.0
     min_loss = float('inf')

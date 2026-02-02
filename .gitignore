@@ -143,3 +143,5 @@ dmypy.json
 /finetune/TRAINING.md
 *.pth
 /finetune/test.ipynb
+/finetune/output/*[-W7,-W14,-W56]*/
+/finetune/results/
